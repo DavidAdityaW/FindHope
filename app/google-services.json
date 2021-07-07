@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "5830336811",
+    "project_id": "findhope-ac255",
+    "storage_bucket": "findhope-ac255.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:5830336811:android:485b760e28d8b25d63256e",
+        "android_client_info": {
+          "package_name": "com.example.findhope"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "5830336811-5ftb8957svmg28jiaf9lctta82dh71f6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB089vKDfTDjvpNs4Hq0A320qeYPTZ9jzg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "5830336811-5ftb8957svmg28jiaf9lctta82dh71f6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
