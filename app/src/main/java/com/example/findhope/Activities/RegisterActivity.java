@@ -181,9 +181,9 @@ public class RegisterActivity extends AppCompatActivity {
         });
     }
 
-    // method pindah activity ke HomeActivity
+    // method pindah activity ke Home
     private void UpdateUI() {
-        Intent homeIntent = new Intent(getApplicationContext(), HomeActivity.class);
+        Intent homeIntent = new Intent(getApplicationContext(), Home.class);
         startActivity(homeIntent);
         finish();
     }
