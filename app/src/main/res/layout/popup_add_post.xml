@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/popup_userphoto"
+        android:layout_width="48dp"
+        android:layout_height="0dp"
+        android:background="#ffffff"
+        android:padding="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/popup_image"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/popup_name"
+        app:layout_constraintTop_toTopOf="parent"
+        android:src="@drawable/img_userphoto" />
+
+    <EditText
+        android:id="@+id/popup_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="text"
+        android:maxLength="20"
+        android:hint="Name"
+        android:background="@drawable/popup_edittext_style"
+        app:layout_constraintEnd_toStartOf="@+id/popup_userphoto"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/popup_image"
+        android:layout_width="0dp"
+        android:layout_height="225dp"
+        android:background="#2d2d2d"
+        android:scaleType="centerCrop"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/popup_name"
+        android:src="@drawable/img_postimage" />
+
+    <TextView
+        android:id="@+id/tv_status"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingTop="10dp"
+        android:paddingLeft="10dp"
+        android:text="Status"
+        android:textSize="16sp"
+        android:textColor="@color/grey"
+        android:background="@color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/popup_image" />
+
+    <RadioGroup
+        android:id="@+id/rg_status"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_status">
+        <RadioButton
+            android:id="@+id/rb_missingpeople"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@color/grey"
+            android:text="MISSING PEOPLE"
+            android:checked="true"/>
+        <RadioButton
+            android:id="@+id/rb_foundpeople"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@color/grey"
+            android:text="FOUND PEOPLE" />
+    </RadioGroup>
+
+    <EditText
+        android:id="@+id/popup_description"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:maxLines="20"
+        android:minLines="5"
+        android:ems="10"
+        android:inputType="textMultiLine"
+        android:hint="More Description"
+        android:background="@drawable/popup_edittext_style"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rg_status" />
+
+    <EditText
+        android:id="@+id/popup_nohp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="numberDecimal"
+        android:maxLength="4"
+        android:hint="No Hp"
+        android:background="@drawable/popup_edittext_style"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/popup_description" />
+
+    <EditText
+        android:id="@+id/popup_email"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textEmailAddress"
+        android:maxLength="4"
+        android:hint="Email"
+        android:background="@drawable/popup_edittext_style"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/popup_nohp" />
+
+    <ImageView
+        android:id="@+id/popup_add_btn"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:background="@drawable/popup_circle_bg_style"
+        android:src="@drawable/ic_round_done_24"
+        android:padding="12dp"
+        app:layout_editor_absoluteX="175dp"
+        app:layout_editor_absoluteY="650dp"
+        app:layout_constraintBottom_toBottomOf="@+id/popup_email"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/popup_email" />
+
+    <ProgressBar
+        android:id="@+id/popup_progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        android:padding="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/popup_add_btn"
+        app:layout_constraintStart_toStartOf="@+id/popup_add_btn"
+        app:layout_constraintTop_toTopOf="@+id/popup_add_btn"
+        android:background="@drawable/popup_circle_bg_style"
+        android:indeterminateTint="#ffffff" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
