@@ -9,8 +9,10 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Gravity;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Menu;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
@@ -19,10 +21,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.example.findhope.Models.PostModel;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -37,6 +42,11 @@ import androidx.appcompat.widget.Toolbar;
 import com.example.findhope.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 /*
     Dikerjakan pada tanggal : 08 Juli 2021
@@ -60,9 +70,10 @@ public class Home extends AppCompatActivity {
 
     Dialog popAddPost;
     ImageView popupUserPhoto, popupImage, popupAddBtn;
-    TextView popupName, popupDescription, popupNoHp, popupEmail;
+    EditText popupName, popupDescription, popupNoHp, popupEmail;
     RadioGroup rgStatus;
-    RadioButton rbMissingPeople, rbFoundPeople;
+    RadioButton rbStatusOption, rbMissingPeople, rbFoundPeople;
+    String strStatus;
     ProgressBar popupProgressBar;
 
 
@@ -124,6 +135,21 @@ public class Home extends AppCompatActivity {
                 || super.onSupportNavigateUp();
     }
 
+    // KONFIGURASI SIDEBAR MENU TITIK
+    // method item selected
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_settings) {
+            FirebaseAuth.getInstance().signOut();
+            Intent loginIntent = new Intent(getApplicationContext(), LoginActivity.class);
+            startActivity(loginIntent);
+            finish();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     // KONFIGURASI POPUP ADD POST
     // method popup
     private void iniPopup() {
@@ -149,58 +175,98 @@ public class Home extends AppCompatActivity {
         // load current userphoto
         Glide.with(Home.this).load(currentUser.getPhotoUrl()).into(popupUserPhoto);
 
-//        // add post
-//        popupAddBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                popupAddBtn.setVisibility(View.INVISIBLE);
-//                popupProgressBar.setVisibility(View.VISIBLE);
-//
-//                if (!popupTitle.getText().toString().isEmpty() && !popupDescription.getText().toString().isEmpty() && !popupKalori.getText().toString().isEmpty()
-//                        && !popupBahan.getText().toString().isEmpty() && !popupCara.getText().toString().isEmpty() && pickedImgUri != null) {
-//                    // TODO: create post object and add it to firebase database
-//                    // first we need upload post image access firebase storage
-//                    StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("post_images");
-//                    final StorageReference imageFilePath = storageReference.child(pickedImgUri.getLastPathSegment());
-//                    imageFilePath.putFile(pickedImgUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-//                        @Override
-//                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-//                            imageFilePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-//                                @Override
-//                                public void onSuccess(Uri uri) {
-//                                    String imageDownloadLink = uri.toString();
-//                                    // create post object
-//                                    Post post = new Post(popupTitle.getText().toString(),
-//                                            popupDescription.getText().toString(),
-//                                            imageDownloadLink,
-//                                            popupKalori.getText().toString(),
-//                                            popupBahan.getText().toString(),
-//                                            popupCara.getText().toString(),
-//                                            currentUser.getUid(),
-//                                            currentUser.getPhotoUrl().toString());
-//
-//                                    // add post to firebase database
-//                                    addPost(post);
-//                                }
-//                            }).addOnFailureListener(new OnFailureListener() {
-//                                @Override
-//                                public void onFailure(@NonNull Exception e) {
-//                                    // something goes wrong uploading picture
-//                                    showMessage(e.getMessage());
-//                                    popupAddBtn.setVisibility(View.VISIBLE);
-//                                    popupProgressBar.setVisibility(View.INVISIBLE);
-//                                }
-//                            });
-//
-//                        }
-//                    });
-//                } else {
-//                    showMessage("Please verify all input fields and choose post image");
-//                    popupAddBtn.setVisibility(View.VISIBLE);
-//                    popupProgressBar.setVisibility(View.INVISIBLE);
-//                }
-//            }
-//        });
+        // select status from radio button
+        rgStatus.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                rbStatusOption = rgStatus.findViewById(checkedId);
+                switch (checkedId) {
+                    case  R.id.rb_missingpeople :
+                        strStatus = rbStatusOption.getText().toString(); // Missing people
+                        break;
+                    case  R.id.rb_foundpeople :
+                        strStatus = rbStatusOption.getText().toString(); // Found People
+                        break;
+                    default:
+                }
+            }
+        });
+
+        // klik popup add btn
+        popupAddBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                popupAddBtn.setVisibility(View.INVISIBLE);
+                popupProgressBar.setVisibility(View.VISIBLE);
+
+                if (!popupName.getText().toString().isEmpty() && !popupDescription.getText().toString().isEmpty() && !popupNoHp.getText().toString().isEmpty() && !popupEmail.getText().toString().isEmpty() && pickedImgUri != null) {
+                    // TODO: create post object and add it to firebase database
+                    // first we need upload post image access firebase storage
+                    StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("posts_images");
+                    final StorageReference imageFilePath = storageReference.child(pickedImgUri.getLastPathSegment());
+                    imageFilePath.putFile(pickedImgUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            imageFilePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                @Override
+                                public void onSuccess(Uri uri) {
+                                    String imageDownloadLink = uri.toString();
+                                    // create post object
+                                    PostModel postModel = new PostModel(popupName.getText().toString(), // name
+                                            imageDownloadLink, // image post
+                                            strStatus, // status missing people or found people
+                                            popupDescription.getText().toString(), // description
+                                            popupNoHp.getText().toString(), // nohp
+                                            popupEmail.getText().toString(), // email
+                                            currentUser.getUid(), // uid
+                                            currentUser.getPhotoUrl().toString()); // user photo
+
+                                    // add post to firebase database
+                                    addPost(postModel);
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    // something goes wrong uploading picture
+                                    showMessage(e.getMessage());
+                                    popupAddBtn.setVisibility(View.VISIBLE);
+                                    popupProgressBar.setVisibility(View.INVISIBLE);
+                                }
+                            });
+
+                        }
+                    });
+                } else {
+                    showMessage("Please verify all input fields and choose post image");
+                    popupAddBtn.setVisibility(View.VISIBLE);
+                    popupProgressBar.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+    }
+    // method add post to firebase database
+    private void addPost(PostModel postModel) {
+        FirebaseDatabase database = FirebaseDatabase.getInstance("https://findhope-ac255-default-rtdb.firebaseio.com/");
+        DatabaseReference myRef = database.getReference("Posts").push();
+
+        // get post unique ID and update post key
+        String key = myRef.getKey();
+        postModel.setPostKey(key);
+
+        // add post to firebase database final
+        myRef.setValue(postModel).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                showMessage("Post Added Successfully");
+                popupAddBtn.setVisibility(View.VISIBLE);
+                popupProgressBar.setVisibility(View.INVISIBLE);
+                popAddPost.dismiss();
+            }
+        });
+    }
+    // method show toast message
+    private void showMessage(String message) {
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
     }
 
     // KONFIGURASI PILIH POST IMAGE
@@ -224,7 +290,8 @@ public class Home extends AppCompatActivity {
                         PReqCode);
             }
         } else {
-            openGallery();
+            openGallery(); // AMBIL PHOTO HANYA PADA GALLERY
+//            starCropActivity(); // COBA IMAGE CROPPER
         }
     }
     // method open gallery
@@ -239,12 +306,50 @@ public class Home extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK && requestCode == REQUESTCODE && data != null) {
-            // the user has successfully picked image
-            // we need to save its reference to a Uri variable
+            // the user has successfully picked image we need to save its reference to a Uri variable
             pickedImgUri = data.getData();
             popupImage.setImageURI(pickedImgUri);
         }
     }
+    // COBA IMAGE CROPPER======================
+//    private void starCropActivity () {
+//        CropImage.activity()
+//                .setFixAspectRatio(true)
+//                .setAspectRatio(1,1)
+//                .setCropShape(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P ? CropImageView.CropShape.RECTANGLE : CropImageView.CropShape.OVAL)
+//                .setActivityTitle("Crop")
+//                .setActivityMenuIconColor(R.color.colorPrimary)
+//                .setGuidelines(CropImageView.Guidelines.ON)
+//                .start(this);
+//    }
+//    @Override
+//    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+//            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+//            if (resultCode == RESULT_OK) {
+//                Uri resultUri = result.getUri();
+//                try {
+//                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), resultUri);
+//                    popupImage.setImageBitmap(bitmap);
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+//                Exception error = result.getError();
+//            }
+//        }
+//        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+//            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+//            if (resultCode == RESULT_OK) {
+//                Uri resultUri = result.getUri();
+//                // pickedImgUri = result.getUri();
+//                popupImage.setImageURI(resultUri);
+//            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+//                Exception error = result.getError();
+//            }
+//        }
+//    }
 
     // KONFIGURASI INFO USER SIGN IN
     // method info user sign in di navigasi header
