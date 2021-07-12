@@ -1,6 +1,7 @@
 package com.example.findhope.Adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.media.Image;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.findhope.Activities.PostDetailActivity;
 import com.example.findhope.Models.PostModel;
 import com.example.findhope.R;
 
@@ -62,6 +64,29 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.MyViewHolder> 
             tvStatus = itemView.findViewById(R.id.row_post_status);
             imgPost = itemView.findViewById(R.id.row_post_img);
             imgUserPhoto = itemView.findViewById(R.id.row_post_profile_img);
+
+            // KONFIGURASI POST DETAIL
+            // klik to post detail
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent postDetailActivity = new Intent(mContext, PostDetailActivity.class);
+                    int position = getAdapterPosition();
+
+                    postDetailActivity.putExtra("postImage",mData.get(position).getPicture());
+                    postDetailActivity.putExtra("name",mData.get(position).getName());
+                    postDetailActivity.putExtra("status",mData.get(position).getStatus());
+                    postDetailActivity.putExtra("description",mData.get(position).getDescription());
+                    postDetailActivity.putExtra("nohp",mData.get(position).getNohp());
+                    postDetailActivity.putExtra("email",mData.get(position).getEmail());
+                    postDetailActivity.putExtra("postKey",mData.get(position).getPostKey());
+                    postDetailActivity.putExtra("userPhoto",mData.get(position).getUserPhoto());
+                    long timestamp = (long) mData.get(position).getTimeStamp();
+                    postDetailActivity.putExtra("postDate",timestamp);
+
+                    mContext.startActivity(postDetailActivity);
+                }
+            });
 
         }
     }
