@@ -38,6 +38,7 @@
                 android:textColor="@android:color/white"
                 android:text="@string/nav_header_title"
                 android:textSize="14sp"
+                android:fontFamily="@font/nunito_bold"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
             <TextView
                 android:id="@+id/nav_useremail"
@@ -45,6 +46,7 @@
                 android:layout_height="wrap_content"
                 android:textColor="@android:color/white"
                 android:textSize="12sp"
+                android:fontFamily="@font/nunito_bold"
                 android:text="@string/nav_header_subtitle" />
         </LinearLayout>
         <LinearLayout

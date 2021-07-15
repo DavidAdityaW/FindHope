@@ -188,6 +188,7 @@ public class Home extends AppCompatActivity {
                         strStatus = rbStatusOption.getText().toString(); // Found People
                         break;
                     default:
+                        strStatus = rbStatusOption.getText().toString(); // Missing people
                 }
             }
         });
@@ -257,9 +258,18 @@ public class Home extends AppCompatActivity {
         myRef.setValue(postModel).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
-                showMessage("Post Added Successfully");
+                showMessage("Post added successfully");
                 popupAddBtn.setVisibility(View.VISIBLE);
                 popupProgressBar.setVisibility(View.INVISIBLE);
+
+                // clean inputan
+                popupName.setText("");
+                //popupImage.setImageURI(pickedImgUri);
+                //radio button
+                popupDescription.setText("");
+                popupNoHp.setText("");
+                popupEmail.setText("");
+
                 popAddPost.dismiss();
             }
         });

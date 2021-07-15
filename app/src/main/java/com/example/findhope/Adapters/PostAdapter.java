@@ -19,6 +19,14 @@ import com.example.findhope.R;
 
 import java.util.List;
 
+/*
+    Dikerjakan pada tanggal : 12 Juli 2021
+    Dibuat oleh :
+    NIM   : 10118071
+    Nama  : David Aditya Winarto
+    Kelas : IF-2
+*/
+
 public class PostAdapter extends RecyclerView.Adapter<PostAdapter.MyViewHolder> {
 
     Context mContext;

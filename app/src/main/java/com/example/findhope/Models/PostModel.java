@@ -2,6 +2,14 @@ package com.example.findhope.Models;
 
 import com.google.firebase.database.ServerValue;
 
+/*
+    Dikerjakan pada tanggal : 12 Juli 2021
+    Dibuat oleh :
+    NIM   : 10118071
+    Nama  : David Aditya Winarto
+    Kelas : IF-2
+*/
+
 public class PostModel {
 
     private String postKey;
