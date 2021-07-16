@@ -2,6 +2,7 @@ package com.example.findhope.Activities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
@@ -20,16 +21,22 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.example.findhope.Adapters.CommentAdapter;
 import com.example.findhope.Models.CommentModel;
 import com.example.findhope.R;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 /*
@@ -48,9 +55,10 @@ public class PostDetailActivity extends AppCompatActivity {
     Button btnAddComment, btnEdit, btnDelete;
     String PostKey;
 
+    // Comment
     RecyclerView RvComment;
-//    CommentAdapter commentAdapter;
-//    List<Comment> listComment;
+    CommentAdapter commentAdapter;
+    List<CommentModel> listComment;
     static String COMMENT_KEY = "Comment";
 
     FirebaseAuth firebaseAuth;
@@ -156,33 +164,32 @@ public class PostDetailActivity extends AppCompatActivity {
             }
         });
 
-//        // ini recyclerview comment
-//        iniRvComment();
+        // ini tampilkan list comment
+        iniRvComment();
     }
 
-    // method comment
-//    private void iniRvComment() {
-//        RvComment.setLayoutManager(new LinearLayoutManager(this));
-//
-//        DatabaseReference commentRef = firebaseDatabase.getReference(COMMENT_KEY).child(PostKey);
-//        commentRef.addValueEventListener(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                listComment = new ArrayList<>();
-//                for (DataSnapshot snap:dataSnapshot.getChildren()) {
-//                    Comment comment = snap.getValue(Comment.class);
-//                    listComment.add(comment);
-//                }
-//                commentAdapter = new CommentAdapter(getApplicationContext(),listComment);
-//                RvComment.setAdapter(commentAdapter);
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError databaseError) {
-//
-//            }
-//        });
-//    }
+    // method tampilkan list comment
+    private void iniRvComment() {
+        RvComment.setLayoutManager(new LinearLayoutManager(this));
+        DatabaseReference commentRef = firebaseDatabase.getReference(COMMENT_KEY).child(PostKey);
+        commentRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                listComment = new ArrayList<>();
+                for (DataSnapshot snap:dataSnapshot.getChildren()) {
+                    CommentModel commentModel = snap.getValue(CommentModel.class);
+                    listComment.add(commentModel);
+                }
+                commentAdapter = new CommentAdapter(getApplicationContext(),listComment);
+                RvComment.setAdapter(commentAdapter);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
 
     // method show toast message
     private void showMessage(String message) {
