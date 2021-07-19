@@ -75,17 +75,17 @@ public class WalkthroughActivity extends AppCompatActivity {
 
         WalkthroughModel itemWalkthrough1 = new WalkthroughModel();
         itemWalkthrough1.setTitle("Hallo!");
-        itemWalkthrough1.setSubtitle("Welcome to David Aditya Winarto apps");
+        itemWalkthrough1.setSubtitle("Welcome to FindHope there's always hope with us");
         itemWalkthrough1.setImage(R.drawable.img_walkthrough1);
 
         WalkthroughModel itemWalkthrough2 = new WalkthroughModel();
-        itemWalkthrough2.setTitle("My Profile, Daily Act, Gallery, Music & Video");
-        itemWalkthrough2.setSubtitle("You can see my profile, daily activity, gallery, music & video in here");
+        itemWalkthrough2.setTitle("Find, Post & Help Other");
+        itemWalkthrough2.setSubtitle("You can find and post a missing or found people in here");
         itemWalkthrough2.setImage(R.drawable.img_walkthrough2);
 
         WalkthroughModel itemWalkthrough3 = new WalkthroughModel();
         itemWalkthrough3.setTitle("Contact Me");
-        itemWalkthrough3.setSubtitle("Also you can see and get my contact or social media in here");
+        itemWalkthrough3.setSubtitle("Also you can see and get contact or email to help each other");
         itemWalkthrough3.setImage(R.drawable.img_walkthrough3);
 
         walkthroughModels.add(itemWalkthrough1);
