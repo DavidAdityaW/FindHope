@@ -89,6 +89,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.MyViewHolder> 
                     postDetailActivity.putExtra("email",mData.get(position).getEmail());
                     postDetailActivity.putExtra("postKey",mData.get(position).getPostKey());
                     postDetailActivity.putExtra("userPhoto",mData.get(position).getUserPhoto());
+                    postDetailActivity.putExtra("userId",mData.get(position).getUserId());
                     long timestamp = (long) mData.get(position).getTimeStamp();
                     postDetailActivity.putExtra("postDate",timestamp);
 

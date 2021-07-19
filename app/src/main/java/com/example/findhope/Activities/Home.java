@@ -109,7 +109,7 @@ public class Home extends AppCompatActivity {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow) // nav_home=home, nav_gallery=recent post
+                R.id.nav_home, R.id.nav_recentpost) // nav_home=home, nav_gallery=recent post | R.id.nav_gallery, R.id.nav_slideshow
                 .setDrawerLayout(drawer)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
@@ -141,7 +141,7 @@ public class Home extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_logout) {
             FirebaseAuth.getInstance().signOut();
             Intent loginIntent = new Intent(getApplicationContext(), LoginActivity.class);
             startActivity(loginIntent);
@@ -264,8 +264,8 @@ public class Home extends AppCompatActivity {
 
                 // clean inputan
                 popupName.setText("");
-                //popupImage.setImageURI(pickedImgUri);
-                //radio button
+                // popupImage.setImageURI(pickedImgUri);
+                // radiobutton status
                 popupDescription.setText("");
                 popupNoHp.setText("");
                 popupEmail.setText("");

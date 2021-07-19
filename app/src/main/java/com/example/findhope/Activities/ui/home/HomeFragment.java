@@ -2,9 +2,12 @@ package com.example.findhope.Activities.ui.home;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -22,6 +25,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -31,6 +35,8 @@ public class HomeFragment extends Fragment {
 
     private HomeViewModel homeViewModel;
 
+
+    EditText etSearch;
 
     RecyclerView postRecyclerView;
     PostAdapter postAdapter;
@@ -73,6 +79,32 @@ public class HomeFragment extends Fragment {
         postRecyclerView.setHasFixedSize(true);
         firebaseDatabase = FirebaseDatabase.getInstance("https://findhope-ac255-default-rtdb.firebaseio.com/");
         databaseReference = firebaseDatabase.getReference("Posts");
+
+
+        // KONFIGURASI SEARCH
+        etSearch = fragmentView.findViewById(R.id.et_search);
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.toString() != null) {
+                    loadDataSearch(s.toString());
+                } else {
+                    loadDataSearch("");
+                }
+            }
+        });
+
+
         return fragmentView;
     }
 
@@ -81,6 +113,29 @@ public class HomeFragment extends Fragment {
         super.onStart();
         // get list posts from firebase database
         databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                postList = new ArrayList<>();
+                for (DataSnapshot postsnap: dataSnapshot.getChildren()) {
+                    PostModel postModel = postsnap.getValue(PostModel.class);
+                    postList.add(postModel);
+                }
+                postAdapter = new PostAdapter(getActivity(),postList);
+                postRecyclerView.setAdapter(postAdapter);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    // searching all data
+    private void loadDataSearch(String data) {
+        Query query = databaseReference.orderByChild("name").startAt(data).endAt(data+"\uf8ff");
+        // get list posts from firebase database
+        query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 postList = new ArrayList<>();

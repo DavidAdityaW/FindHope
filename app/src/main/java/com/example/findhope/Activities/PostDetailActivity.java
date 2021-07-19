@@ -166,6 +166,32 @@ public class PostDetailActivity extends AppCompatActivity {
 
         // ini tampilkan list comment
         iniRvComment();
+
+        // KONFIGURASI DELETE DAN UPDATE
+        // cek current user login sama dengan user id post
+        String myuserid = firebaseUser.getUid();
+        final String postUserId = getIntent().getExtras().getString("userId");
+        if (myuserid.equals(postUserId)) {
+            btnEdit.setVisibility(View.VISIBLE);
+            btnDelete.setVisibility(View.VISIBLE);
+        } else {
+            btnEdit.setVisibility(View.INVISIBLE);
+            btnDelete.setVisibility(View.INVISIBLE);
+        }
+        // delete post
+        btnDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DatabaseReference deleteReference = firebaseDatabase.getReference("Posts").child(PostKey);
+                DatabaseReference commentReference = firebaseDatabase.getReference("Comment").child(PostKey);
+                deleteReference.removeValue();
+                commentReference.removeValue();
+                Intent homeIntent = new Intent(getApplicationContext(), HomeActivity.class);
+                startActivity(homeIntent);
+                finish();
+                showMessage("Delete post successfully");
+            }
+        });
     }
 
     // method tampilkan list comment
