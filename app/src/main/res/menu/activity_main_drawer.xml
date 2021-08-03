@@ -9,6 +9,14 @@
             android:icon="@drawable/ic_round_home_24"
             android:title="@string/menu_home" />
         <item
+            android:id="@+id/nav_missingpeople"
+            android:icon="@drawable/ic_round_sentiment_dissatisfied_24"
+            android:title="Missing People" />
+        <item
+            android:id="@+id/nav_foundpeople"
+            android:icon="@drawable/ic_round_sentiment_satisfied_24"
+            android:title="Found People" />
+        <item
             android:id="@+id/nav_recentpost"
             android:icon="@drawable/ic_baseline_update_24"
             android:title="Recent Post" />
@@ -26,7 +34,7 @@
             android:title="Other">
             <menu>
                 <item
-                    android:id="@+id/nav_about"
+                    android:id="@+id/nav_aboutus"
                     android:title="About Us" />
                 <item
                     android:id="@+id/nav_privacy"

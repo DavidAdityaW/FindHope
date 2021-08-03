@@ -46,7 +46,7 @@ public class RegisterActivity extends AppCompatActivity {
     ImageView imgUserPhoto;
     static int PReqCode = 1;
     static int REQUESTCODE = 1;
-    Uri pickedImgUri;
+    Uri pickedImgUri = null;
 
     private EditText userName, userEmail, userPassword, userPassword2;
     private Button btnRegister, btnLogin;
@@ -83,7 +83,7 @@ public class RegisterActivity extends AppCompatActivity {
                 final String password = userPassword.getText().toString();
                 final String password2 = userPassword2.getText().toString();
 
-                if (name.isEmpty() || email.isEmpty() || password.isEmpty() || password2.isEmpty()) {
+                if (name.isEmpty() || email.isEmpty() || password.isEmpty() || password2.isEmpty() || pickedImgUri == null) {
                     // cek inputan tidak boleh kosong
                     showMessage("Please verify all fields");
                     btnRegister.setVisibility(View.VISIBLE);

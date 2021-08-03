@@ -1,28 +1,42 @@
 package com.example.findhope.Activities;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
+import android.app.Dialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.format.DateFormat;
 import android.text.util.Linkify;
+import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.findhope.Adapters.CommentAdapter;
 import com.example.findhope.Models.CommentModel;
+import com.example.findhope.Models.PostModel;
 import com.example.findhope.R;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -32,7 +46,11 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -65,6 +83,19 @@ public class PostDetailActivity extends AppCompatActivity {
     FirebaseUser firebaseUser;
     FirebaseDatabase firebaseDatabase;
 
+    // edit post
+    Dialog popEditPost;
+    ImageView popupUserPhoto, popupImage, popupAddBtn;
+    EditText popupName, popupDescription, popupNoHp, popupEmail;
+    RadioGroup rgStatus;
+    RadioButton rbStatusOption, rbMissingPeople, rbFoundPeople;
+    String strStatus;
+    ProgressBar popupProgressBar;
+    // picked image post
+    private static final int PReqCode = 2;
+    private static final int REQUESTCODE = 2;
+    private Uri pickedImgUri = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,35 +127,35 @@ public class PostDetailActivity extends AppCompatActivity {
 
         // KONFIGURASI BIND DATA
         // get and bind all data dari postadapter
-        String postImage = getIntent().getExtras().getString("postImage");
+        final String postImage = getIntent().getExtras().getString("postImage");
         Glide.with(this).load(postImage).into(imgPost);
 
-        String postName = getIntent().getExtras().getString("name");
+        final String postName = getIntent().getExtras().getString("name");
         txtPostName.setText(postName);
 
-        String postStatus = getIntent().getExtras().getString("status");
+        final String postStatus = getIntent().getExtras().getString("status");
         txtPostStatus.setText(postStatus);
         // merubah warna textview status
         if (txtPostStatus.getText().equals("MISSING PEOPLE")) {
-            txtPostStatus.setTextColor(Color.RED);
+            txtPostStatus.setTextColor(Color.parseColor("#ff0000"));
         } else if (txtPostStatus.getText().equals("FOUND PEOPLE")) {
             txtPostStatus.setTextColor(Color.parseColor("#1db954"));
         }
 
-        String postDesc = getIntent().getExtras().getString("description");
+        final String postDesc = getIntent().getExtras().getString("description");
         txtPostDesc.setText(postDesc);
 
-        String postNoHp = getIntent().getExtras().getString("nohp");
+        final String postNoHp = getIntent().getExtras().getString("nohp");
         txtPostNoHp.setText(postNoHp);
         // menelpon otomatis
         Linkify.addLinks(txtPostNoHp, Linkify.PHONE_NUMBERS);
 
-        String postEmail = getIntent().getExtras().getString("email");
+        final String postEmail = getIntent().getExtras().getString("email");
         txtPostEmail.setText(postEmail);
         // mengirim email otomatis
         Linkify.addLinks(txtPostEmail, Linkify.EMAIL_ADDRESSES);
 
-        String userPostImage = getIntent().getExtras().getString("userPhoto");
+        final String userPostImage = getIntent().getExtras().getString("userPhoto");
         Glide.with(this).load(userPostImage).into(imgUserPost);
 
         String date = timestampToString(getIntent().getExtras().getLong("postDate"));
@@ -167,6 +198,7 @@ public class PostDetailActivity extends AppCompatActivity {
         // ini tampilkan list comment
         iniRvComment();
 
+
         // KONFIGURASI DELETE DAN UPDATE
         // cek current user login sama dengan user id post
         String myuserid = firebaseUser.getUid();
@@ -182,18 +214,211 @@ public class PostDetailActivity extends AppCompatActivity {
         btnDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DatabaseReference deleteReference = firebaseDatabase.getReference("Posts").child(PostKey);
-                DatabaseReference commentReference = firebaseDatabase.getReference("Comment").child(PostKey);
-                deleteReference.removeValue();
-                commentReference.removeValue();
-                Intent homeIntent = new Intent(getApplicationContext(), HomeActivity.class);
-                startActivity(homeIntent);
-                finish();
-                showMessage("Delete post successfully");
+                AlertDialog dialog = new AlertDialog.Builder(PostDetailActivity.this)
+                        .setTitle("Confirmation")
+                        .setMessage("Are you sure delete this post?")
+                        .setPositiveButton("Yes", null)
+                        .setNegativeButton("No", null)
+                        .show();
+
+                Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                positiveButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        DatabaseReference deleteReference = firebaseDatabase.getReference("Posts").child(PostKey);
+                        DatabaseReference commentReference = firebaseDatabase.getReference("Comment").child(PostKey);
+                        deleteReference.removeValue();
+                        commentReference.removeValue();
+                        Intent homeIntent = new Intent(getApplicationContext(), Home.class);
+                        startActivity(homeIntent);
+                        finish();
+                        showMessage("Delete post successfully");
+                    }
+                });
+            }
+        });
+
+        // edit post
+        btnEdit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                popEditPost = new Dialog(PostDetailActivity.this);
+                popEditPost.setContentView(R.layout.popup_add_post);
+                popEditPost.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                popEditPost.getWindow().setLayout(Toolbar.LayoutParams.MATCH_PARENT, Toolbar.LayoutParams.WRAP_CONTENT);
+                popEditPost.getWindow().getAttributes().gravity = Gravity.TOP;
+                popEditPost.show();
+
+                // popup widget
+                popupUserPhoto = popEditPost.findViewById(R.id.popup_userphoto);
+                popupImage =  popEditPost.findViewById(R.id.popup_image);
+                popupName =  popEditPost.findViewById(R.id.popup_name);
+                rgStatus =  popEditPost.findViewById(R.id.rg_status); // radiogroup
+                rbMissingPeople =  popEditPost.findViewById(R.id.rb_missingpeople); // radiobutton
+                rbFoundPeople =  popEditPost.findViewById(R.id.rb_foundpeople); // radiobutton
+                popupDescription =  popEditPost.findViewById(R.id.popup_description);
+                popupNoHp =  popEditPost.findViewById(R.id.popup_nohp);
+                popupEmail =  popEditPost.findViewById(R.id.popup_email);
+                popupAddBtn =  popEditPost.findViewById(R.id.popup_add_btn);
+                popupProgressBar =  popEditPost.findViewById(R.id.popup_progressBar);
+
+                // set data ke inputan edit
+                popupName.setText(postName);
+                Glide.with(PostDetailActivity.this).load(userPostImage).into(popupUserPhoto);
+                Glide.with(PostDetailActivity.this).load(postImage).into(popupImage);
+                if (postStatus.equals("MISSING PEOPLE")) {
+                    rbMissingPeople.setChecked(true);
+                } else if (postStatus.equals("FOUND PEOPLE")) {
+                    rbFoundPeople.setChecked(true);
+                }
+                popupDescription.setText(postDesc);
+                popupNoHp.setText(postNoHp);
+                popupEmail.setText(postEmail);
+
+                // klik image post jika ingin diubah
+                popupImage.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        checkAndRequestForPermission();
+                    }
+                });
+                // select status from radio button
+                rgStatus.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(RadioGroup group, int checkedId) {
+                        rbStatusOption = rgStatus.findViewById(checkedId);
+                        switch (checkedId) {
+                            case  R.id.rb_missingpeople :
+                                strStatus = rbStatusOption.getText().toString(); // Missing people
+                                break;
+                            case  R.id.rb_foundpeople :
+                                strStatus = rbStatusOption.getText().toString(); // Found People
+                                break;
+                            default:
+                                strStatus = rbStatusOption.getText().toString(); // Missing people
+                        }
+                    }
+                });
+
+                // klik popup edit btn
+                popupAddBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        popupAddBtn.setVisibility(View.INVISIBLE);
+                        popupProgressBar.setVisibility(View.VISIBLE);
+
+                        if (!popupName.getText().toString().isEmpty() && !popupDescription.getText().toString().isEmpty() && !popupNoHp.getText().toString().isEmpty() && !popupEmail.getText().toString().isEmpty()) {
+                            // TODO: create post object and add it to firebase database
+                            // first we need upload post image access firebase storage
+                            final StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("posts_images");
+                            final StorageReference imageFilePath = storageReference.child(pickedImgUri.getLastPathSegment());
+                            imageFilePath.putFile(pickedImgUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                @Override
+                                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                    imageFilePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                        @Override
+                                        public void onSuccess(Uri uri) {
+                                            final String imageDownloadLink = uri.toString();
+                                            final String updateName = popupName.getText().toString();
+                                            final String updateStatus = strStatus;
+                                            final String updateDescription = popupDescription.getText().toString();
+                                            final String updateNoHp = popupNoHp.getText().toString();
+                                            final String updateEmail = popupEmail.getText().toString();
+
+                                            final String postKey = getIntent().getExtras().getString("postKey");
+
+
+                                            // delete image post before
+
+
+                                            FirebaseDatabase database = FirebaseDatabase.getInstance("https://findhope-ac255-default-rtdb.firebaseio.com/");
+                                            DatabaseReference myRef = database.getReference("Posts");
+                                            Query query = myRef.orderByChild("postKey").equalTo(postKey);
+                                            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                    for (DataSnapshot ds: dataSnapshot.getChildren()) {
+                                                        ds.getRef().child("name").setValue(updateName);
+                                                        ds.getRef().child("picture").setValue(imageDownloadLink);
+                                                        ds.getRef().child("status").setValue(updateStatus);
+                                                        ds.getRef().child("description").setValue(updateDescription);
+                                                        ds.getRef().child("nohp").setValue(updateNoHp);
+                                                        ds.getRef().child("email").setValue(updateEmail);
+
+                                                        showMessage("Post updated successfully");
+                                                        popupAddBtn.setVisibility(View.VISIBLE);
+                                                        popupProgressBar.setVisibility(View.INVISIBLE);
+                                                        popEditPost.dismiss();
+                                                        Intent homeIntent = new Intent(getApplicationContext(), Home.class);
+                                                        startActivity(homeIntent);
+                                                        finish();
+                                                    }
+                                                }
+
+                                                @Override
+                                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                }
+                                            });
+                                        }
+                                    }).addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            // something goes wrong uploading picture
+                                            showMessage(e.getMessage());
+                                            popupAddBtn.setVisibility(View.VISIBLE);
+                                            popupProgressBar.setVisibility(View.INVISIBLE);
+                                        }
+                                    });
+
+                                }
+                            });
+                        } else {
+                            showMessage("Please verify all input fields and choose post image");
+                            popupAddBtn.setVisibility(View.VISIBLE);
+                            popupProgressBar.setVisibility(View.INVISIBLE);
+                        }
+                    }
+                });
             }
         });
     }
 
+    // KONFIGURASI EDIT IMAGE POST
+    // method check and request permission
+    private void checkAndRequestForPermission() {
+        if (ContextCompat.checkSelfPermission(PostDetailActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(PostDetailActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                Toast.makeText(PostDetailActivity.this, "Please accept for required permission", Toast.LENGTH_SHORT).show();
+            } else {
+                ActivityCompat.requestPermissions(PostDetailActivity.this,
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        PReqCode);
+            }
+        } else {
+            openGallery(); // AMBIL PHOTO HANYA PADA GALLERY
+        }
+    }
+    // method open gallery
+    private void openGallery() {
+        // TODO: open gallery intent and wait user to pick an image
+        Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        galleryIntent.setType("image/*");
+        startActivityForResult(galleryIntent, REQUESTCODE);
+    }
+    // method when user picked an image
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK && requestCode == REQUESTCODE && data != null) {
+            // the user has successfully picked image we need to save its reference to a Uri variable
+            pickedImgUri = data.getData();
+            popupImage.setImageURI(pickedImgUri);
+        }
+    }
+
+
+    // KONFIGURASI COMMENT
     // method tampilkan list comment
     private void iniRvComment() {
         RvComment.setLayoutManager(new LinearLayoutManager(this));

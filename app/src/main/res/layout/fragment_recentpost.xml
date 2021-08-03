@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".Activities.ui.slideshow.SlideshowFragment">
+    tools:context=".Activities.ui.aboutus.AboutUsFragment">
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/iv_userphoto"
@@ -38,7 +38,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginTop="8dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="14dp"
         android:background="@color/grey" />
 
     <androidx.recyclerview.widget.RecyclerView

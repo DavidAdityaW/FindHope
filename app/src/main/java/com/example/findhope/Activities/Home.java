@@ -24,6 +24,7 @@ import com.bumptech.glide.Glide;
 import com.example.findhope.Models.PostModel;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
@@ -109,13 +110,16 @@ public class Home extends AppCompatActivity {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_recentpost) // nav_home=home, nav_gallery=recent post | R.id.nav_gallery, R.id.nav_slideshow
+                R.id.nav_home, R.id.nav_missingpeople, R.id.nav_foundpeople, R.id.nav_recentpost) // nav_home=home,nav_recentpost=recentpost | R.id.nav_gallery, R.id.nav_slideshow
                 .setDrawerLayout(drawer)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
 
+        // KONFIGURASI BOTTOM NAVIGATION MENU
+        BottomNavigationView bottom_nav_view = findViewById(R.id.bottom_nav_view);
+        NavigationUI.setupWithNavController(bottom_nav_view, navController);
         // KONFIGURASI BURGER MENU
 //        getSupportActionBar().setHomeButtonEnabled(true);
 //        getSupportActionBar().setDisplayHomeAsUpEnabled(true);

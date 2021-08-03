@@ -37,6 +37,7 @@ public class HomeFragment extends Fragment {
 
 
     EditText etSearch;
+    TextView tvCountMissingPeople, tvCountFoundPeople;
 
     RecyclerView postRecyclerView;
     PostAdapter postAdapter;
@@ -59,7 +60,7 @@ public class HomeFragment extends Fragment {
 //        });
 //        return root;
 
-        // KONFIGURASI LIST POST
+        // KONFIGURASI LIST POST - ALL
         // Inflate the layout for this fragment - list post berhasil cuma yang baru dibawah
 //        View fragmentView = inflater.inflate(R.layout.fragment_home, container, false);
 //        postRecyclerView = fragmentView.findViewById(R.id.postRV);
@@ -79,7 +80,6 @@ public class HomeFragment extends Fragment {
         postRecyclerView.setHasFixedSize(true);
         firebaseDatabase = FirebaseDatabase.getInstance("https://findhope-ac255-default-rtdb.firebaseio.com/");
         databaseReference = firebaseDatabase.getReference("Posts");
-
 
         // KONFIGURASI SEARCH
         etSearch = fragmentView.findViewById(R.id.et_search);
@@ -101,6 +101,50 @@ public class HomeFragment extends Fragment {
                 } else {
                     loadDataSearch("");
                 }
+            }
+        });
+
+        // KONFIGURASI COUNT MISSING AND FOUND POST
+        tvCountMissingPeople = fragmentView.findViewById(R.id.tv_countmissingpeople);
+        tvCountFoundPeople = fragmentView.findViewById(R.id.tv_countfoundpeople);
+        // missing people
+        Query queryCountMissingPeople = databaseReference.orderByChild("status").equalTo("MISSING PEOPLE");
+        queryCountMissingPeople.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    int countMissing;
+                    countMissing = (int) dataSnapshot.getChildrenCount(); // get count missing people
+
+                    tvCountMissingPeople.setText(Integer.toString(countMissing));
+                } else {
+                    tvCountMissingPeople.setText("0");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        // found people
+        Query queryCountFoundPeople = databaseReference.orderByChild("status").equalTo("FOUND PEOPLE");
+        queryCountFoundPeople.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    int countFound;
+                    countFound = (int) dataSnapshot.getChildrenCount(); // get count found people
+
+                    tvCountFoundPeople.setText(Integer.toString(countFound));
+                } else {
+                    tvCountFoundPeople.setText("0");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
             }
         });
 

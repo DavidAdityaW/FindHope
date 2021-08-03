@@ -22,7 +22,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:inputType="text"
+        android:inputType="textCapSentences"
         android:maxLength="20"
         android:hint="Name"
         android:textSize="16sp"
